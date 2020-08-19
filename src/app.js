@@ -13,6 +13,10 @@ function validateReposUuid(request, response, next) {
   return next();
 }
 
+function findRepoIndexById(id) {
+  return repositories.findIndex(p => p.id === id);
+}
+
 app.use(express.json());
 app.use(cors());
 app.use('/repositories/:id', validateReposUuid);
@@ -39,7 +43,7 @@ app.post("/repositories", (request, response) => {
 app.put("/repositories/:id", (request, response) => {
   const { id } = request.params;
   const { title, url, techs } = request.body;
-  const repoIndex = repositories.findIndex(p => p.id === id);
+  const repoIndex = findRepoIndexById(id);
 
   if (repoIndex < 0) {
     return response.status(400).json({ error: 'project not found.' });
@@ -61,7 +65,7 @@ app.put("/repositories/:id", (request, response) => {
 
 app.delete("/repositories/:id", (request, response) => {
   const { id } = request.params;
-  const repoIndex = repositories.findIndex(p => p.id === id);
+  const repoIndex = findRepoIndexById(id);
 
   if (repoIndex < 0) {
     return response.status(400).json({ error: "repo not found." });
@@ -73,7 +77,16 @@ app.delete("/repositories/:id", (request, response) => {
 });
 
 app.post("/repositories/:id/like", (request, response) => {
-  // TODO
+  const { id } = request.params;
+  const repoIndex = findRepoIndexById(id);
+
+  if (repoIndex < 0) {
+    return response.status(400).json({ error: "repo not found." });
+  }
+
+  repositories[repoIndex].likes++;
+  return response.json({ "likes": repositories[repoIndex].likes });
+
 });
 
 module.exports = app;
